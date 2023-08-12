@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool is_pause=true;
 
 private slots:
     void on_start_clicked();
@@ -22,7 +23,17 @@ private slots:
 
     void on_pause_clicked();
 
+    void game_over(bool is);
 private:
     Ui::MainWindow *ui;
+
+    // QObject interface
+public:
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+
+    // QWidget interface
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
 };
 #endif // MAINWINDOW_H

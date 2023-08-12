@@ -183,8 +183,30 @@ void Item::draw(QPainter &painter)
 
 void Item::down_move(int y)//方块下降
 {
+    if(y==0){
+        for(auto p=all_point.begin();p!=all_point.end();p++){
+            p->setY(p->y()+RECT_HEIGHT);
+        }
+        return;
+    }
     for(auto p=all_point.begin();p!=all_point.end();p++){
         p->setY(p->y()+y*10);
+    }
+
+}
+
+void Item::line_move(int x)
+{
+    if(x==0){
+        for(auto p=all_point.begin();p!=all_point.end();p++){
+            p->setX(p->x()-RECT_WIDTH);
+
+        }
+    }
+    if(x==1){
+        for(auto p=all_point.begin();p!=all_point.end();p++){
+            p->setX(p->x()+RECT_WIDTH);
+        }
     }
 }
 

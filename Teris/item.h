@@ -39,6 +39,7 @@ public:
     void Init_rand();
     void draw(QPainter &painter);
     void down_move(int y);
+    void line_move(int x);
 
 //    // QWidget interface
 //protected:
