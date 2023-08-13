@@ -175,7 +175,6 @@ void Item::Init_rand()//随机方块类型和种类
 
 void Item::draw(QPainter &painter)
 {
-    Q_UNUSED(painter);
     for(auto p=all_point.begin();p<all_point.end();p++)
         painter.drawRect((*p).x(),(*p).y(),RECT_WIDTH,RECT_HEIGHT);
 

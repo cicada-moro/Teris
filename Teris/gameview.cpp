@@ -59,6 +59,7 @@ void gameview::restart()
     down_item.clear();
     line_count.clear();
     top_item.clear();
+    killTimer(time_id);
     init();
     begin();
 }
@@ -93,13 +94,22 @@ void gameview::draw_downitem()
     }
 }
 
-void gameview::add_downitem()
+void gameview::add_downitem()//更新底部方块群
 {
     QVector<QPoint> points=now_item->getAll_point();
+    //加入底部方块群
     for(int i=0;i<points.size();i++){
         const QPoint p=points[i];
-        down_item.insert(p.x(),p);
+        down_item.insert(p.y(),p);
+
+        int count=line_count.value(p.y());
+        line_count.insert(p.y(),count+=1);
     }
+//    QMap<int, int>::Iterator iter;
+//    for(iter = line_count.begin(); iter != line_count.end(); ++iter)
+//    {
+//        qDebug()<< "for   ==number==" << iter.key() << " name==" << iter.value();
+//    }
 }
 
 bool gameview::left_col()//是否左碰壁
@@ -184,13 +194,31 @@ void gameview::move(const QString &button)//移动方块
     }
     else if(button=="down"){//加速下移
         now_item->down_move(1);
+        qDebug()<<now_item;
         repaint();
+    }
+    else if(button=="space"){//直接到底
+        while(true){
+            if(bottom_col()){
+                break;
+            }
+            now_item->down_move(1);
+        }
     }
 }
 
 void gameview::update_topitem()
 {
     QList<QPoint> list=down_item.values();
+
+    for(int i=0;i<top_item.size();i++){
+        if(top_item[i]==QPoint(-1,-1)||top_item[i].y()==(RECT_ROWS-1)*RECT_HEIGHT)
+            continue;
+        if(!list.contains(top_item[i])){
+            int x=i%(RECT_COLUMES-2);
+            top_item[i]=QPoint((x+1)*RECT_WIDTH,0);
+        }
+    }
     for(int i=0;i<list.size();i++){
         bool flag=false;//判断方块正上方是否有方块
         int max_y=list[i].y();
@@ -210,7 +238,6 @@ void gameview::update_topitem()
 
         if(!flag){//更新顶部方块
             int x=(pt.x()-RECT_WIDTH)/RECT_WIDTH;
-            qDebug()<<x;
             top_item[x]=pt;
         }
 
@@ -236,7 +263,7 @@ void gameview::update_topitem()
 //    }
 }
 
-int gameview::topnum_item(QPoint &pt,int &num)//计算中间缝隙的方块或底部边界的正上方有几个方块
+int gameview::topnum_item(QPoint &pt,int &num)//算最顶端方块正下有几个有缝隙的方块，并加入顶部群
 {
     QList<QPoint> list=down_item.values();
     QPoint p(pt.x(),(RECT_ROWS-1)*RECT_HEIGHT);
@@ -269,11 +296,30 @@ int gameview::topnum_item(QPoint &pt,int &num)//计算中间缝隙的方块或�
     if(!list.contains(p-QPoint(0,RECT_HEIGHT))){
         num++;
         int x=(pt.x()-RECT_WIDTH)/RECT_WIDTH+num*(RECT_COLUMES-2);
-        qDebug()<<pt.x()<<x;
+//        qDebug()<<pt.x()<<x;
 
         top_item[x]=p;
     }
     return num;
+}
+
+int gameview::clear_downitem(int num)
+{
+    line_count[num]=0;
+    down_item.remove(num);
+
+    QMap<int, int>::Iterator iter;
+    QList<int> line=line_count.keys();
+    for(int i=0;i<line.size();i++){
+        if(line[i]<num){
+            QList<QPoint> pts=down_item.values(line[i]);
+            down_item.remove(line[i]);
+            for(int j=0;j<pts.size();j++){
+                QPoint pt=pts[j]+QPoint(0,RECT_HEIGHT);
+                down_item.insert(pt.y(),pt);
+            }
+        }
+    }
 }
 
 void gameview::paintEvent(QPaintEvent *event)//绘图事件，当窗体发生变更时，自动执行
@@ -288,8 +334,22 @@ void gameview::timerEvent(QTimerEvent *event)
 {
     if(event->timerId()==time_id){//判断是哪个计时器
         if(bottom_col()){//方块到底部
+            int count=0;
             add_downitem();//把方块加入底部方块群
+            QMap<int, int>::Iterator iter;
+            for(iter = line_count.begin(); iter != line_count.end(); ++iter)
+            {
+                if(iter.value()==RECT_COLUMES-2){
+                    clear_downitem(iter.key());
+                    count+=1;
+                }
+            }
+
+
+
+
             update_topitem();
+            //游戏结束
             if(top_col()){
                 QMessageBox::information(this,"游戏状态","游戏结束！",QMessageBox::Ok);
                 delete(now_item);
@@ -300,6 +360,7 @@ void gameview::timerEvent(QTimerEvent *event)
                 line_count.clear();
                 top_item.clear();
                 killTimer(time_id);
+                //发送游戏结束信号
                 emit(is_gameover(true));
                 return;
             }
@@ -309,6 +370,6 @@ void gameview::timerEvent(QTimerEvent *event)
         else{
             now_item->down_move(1);
         }
-        repaint();//重绘
+        update();//重绘
     }
 }

@@ -29,6 +29,7 @@ public:
     void move(const QString &button);
     void update_topitem();
     int topnum_item(QPoint &pt,int &num);
+    int clear_downitem(int num);
 signals:
     void is_gameover(bool is);
 private:
