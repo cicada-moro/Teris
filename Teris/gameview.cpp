@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QMap>
 #include <QMultiMap>
+#include <QTimer>
 #include <QMapIterator>
 #include <QMessageBox>
 
@@ -22,6 +23,7 @@ gameview::gameview(QWidget *parent)
 
 void gameview::init()
 {
+    time=new QTimer(this);
     now_item=new Item();
     //初始化top_item
     QPoint p(RECT_WIDTH,(RECT_ROWS-1)*RECT_HEIGHT);
@@ -42,7 +44,6 @@ void gameview::begin()
 //    qDebug()<<"asdf";
     //设置间隔时间为400的计时器
     time_id=startTimer(400);
-    time.start();
 }
 
 void gameview::pause()
@@ -207,6 +208,21 @@ void gameview::move(const QString &button)//移动方块
     }
 }
 
+void gameview::demotion()
+{
+    QVector<QPoint> pts=now_item->getAll_point();
+    ITEM_STYLE STYLE=now_item->getStyle();
+    now_item->defomation(now_item);
+    if(left_col()||right_col()){
+        now_item->setAll_point(pts);
+        now_item->setStyle(STYLE);
+        qDebug()<<"no";
+    }
+    else{
+        repaint();
+    }
+}
+
 void gameview::update_topitem()
 {
     QList<QPoint> list=down_item.values();
@@ -336,6 +352,7 @@ void gameview::timerEvent(QTimerEvent *event)
         if(bottom_col()){//方块到底部
             int count=0;
             add_downitem();//把方块加入底部方块群
+            //消除方块并获得分数值
             QMap<int, int>::Iterator iter;
             for(iter = line_count.begin(); iter != line_count.end(); ++iter)
             {
@@ -344,7 +361,7 @@ void gameview::timerEvent(QTimerEvent *event)
                     count+=1;
                 }
             }
-
+            emit send_score(count);
 
 
 

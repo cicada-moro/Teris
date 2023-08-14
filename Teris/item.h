@@ -40,11 +40,18 @@ public:
     void draw(QPainter &painter);
     void down_move(int y);
     void line_move(int x);
+    void defomation(Item *item);//变形
 
 //    // QWidget interface
 //protected:
     //    virtual void paintEvent(QPaintEvent *event) override;
     QVector<QPoint> getAll_point() const;
+
+    ITEM_TYPE getType() const;
+    void setType(ITEM_TYPE newType);
+    ITEM_STYLE getStyle() const;
+    void setStyle(ITEM_STYLE newStyle);
+    void setAll_point(const QVector<QPoint> &newAll_point);
 };
 
 #endif // ITEM_H

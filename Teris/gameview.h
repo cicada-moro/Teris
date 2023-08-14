@@ -14,6 +14,7 @@ class gameview:public QWidget
 public:
     explicit gameview(QWidget *parent=nullptr);
 public:
+    QTimer *time;
     void init();
     void begin();
     void pause();
@@ -27,18 +28,20 @@ public:
     bool bottom_col();
     bool top_col();
     void move(const QString &button);
+    void demotion();
     void update_topitem();
     int topnum_item(QPoint &pt,int &num);
     int clear_downitem(int num);
 signals:
     void is_gameover(bool is);
+    void send_score(int count);
 private:
     Item *now_item;//当前在运动的方块
     QMultiMap<int,QPoint> down_item;//底下方块<方块，在第几行>
     QMap<int,int> line_count;//统计每行方块的数量<在第几行，数量>
     QVector<QPoint> top_item;//统计底部方块区域中最上面的方块坐标
     int time_id;
-    QTimer time;
+
 
 
     // QWidget interface

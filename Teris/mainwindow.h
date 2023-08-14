@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    int time=0;
     bool is_pause=true;
 
 private slots:
@@ -24,6 +25,10 @@ private slots:
     void on_pause_clicked();
 
     void game_over(bool is);
+
+    void set_score(int count);
+
+    void set_time();
 private:
     Ui::MainWindow *ui;
 
